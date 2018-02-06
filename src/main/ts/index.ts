@@ -44,7 +44,8 @@ L = 0;
 r = 9;
 
 if( ALLOW_JUMPING ) {
-    onclick = function () {
+    // have to add to canvas, otherwise it doesn't work on mobile
+    a.onclick = function () {
         T = t;
     }    
 }
