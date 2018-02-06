@@ -14,11 +14,13 @@ const SLIGHTLY_SAFER_COLLISIONS = false;
 const GROUND_COLOR = '#fff';
 const COIN_COLOR = '#ff0';
 const ONLY_USE_HORIZONTAL_VELOCITY_TO_GENERATE_LINES = true;
+const FIX_COIN_SCALE = 9;
 
 // TODO draw a spinning $ in the coin
 // TODO glowing ground
 // TODO collectible coins
 // TODO buy/sell mode
+// TODO scale radius/gravity to screen size
 
 M = Math.abs;
 S = Math.sin;
@@ -41,7 +43,11 @@ w = 0;
 t = 0;
 T = 0;
 L = 0;
-r = 9;
+if( FIX_COIN_SCALE ) {
+    r = FIX_COIN_SCALE;
+} else {
+    r = W / 99;
+}
 
 if( ALLOW_JUMPING ) {
     // have to add to canvas, otherwise it doesn't work on mobile
@@ -70,7 +76,11 @@ function update(now: number) {
     c.fillRect(0, 0, W, H);
 
     // gravity
-    w += f / 999;
+    if( FIX_COIN_SCALE ) {
+        w += f / (111 * FIX_COIN_SCALE);
+    } else {
+        w += f / W;
+    }
 
     // camera bounds
     X = x - W/3;
@@ -219,7 +229,12 @@ function update(now: number) {
     y += U;     
     
     if( ALLOW_JUMPING && T && M(T - L) < 299 ) {
-        w -= .4;
+        if( FIX_COIN_SCALE ) {
+            w -= FIX_COIN_SCALE/20.0;
+        } else {
+            w -= r/20.0;
+            //w -= 0.5;
+        }
         T = 0;
         L = 0;
     }        
