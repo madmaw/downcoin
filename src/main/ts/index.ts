@@ -2,7 +2,7 @@
 const COIN_SYMBOL = null;
 const DRAW_SCORE = true;
 // saves 
-const CENTER_SCORE = false;
+const CENTER_SCORE = true;
 
 let ALLOW_JUMPING = true;
 // saves about 13 bytes
