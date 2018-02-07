@@ -14,7 +14,9 @@ const SLIGHTLY_SAFER_COLLISIONS = false;
 const GROUND_COLOR = '#fff';
 const COIN_COLOR = '#ff0';
 const ONLY_USE_HORIZONTAL_VELOCITY_TO_GENERATE_LINES = true;
-const FIX_COIN_SCALE = 9;
+const FIX_COIN_SCALE = 0;
+const MAX_MILLISECONDS_PER_FRAME = 80;
+const GOOD_TOUCH = true;
 
 // TODO draw a spinning $ in the coin
 // TODO glowing ground
@@ -38,7 +40,7 @@ if( FIX_VIEWPORT_HEIGHT && FIX_VIEWPORT_WIDTH ) {
 
 x = W;
 y = 0;
-v = 0;
+v = 1;
 w = 0;
 t = 0;
 T = 0;
@@ -51,15 +53,21 @@ if( FIX_COIN_SCALE ) {
 
 if( ALLOW_JUMPING ) {
     // have to add to canvas, otherwise it doesn't work on mobile
-    a.onclick = function () {
-        T = t;
-    }    
+    if( GOOD_TOUCH ) {
+        onmousedown = a.ontouchstart = function() {
+            T = t;
+        };
+    } else {
+        a.onclick = function () {
+            T = t;
+        }        
+    }
 }
 
 s = [
     {
         x: 0, 
-        y: 0,
+        y: H,
         u: 0, 
         v: -r, 
         a: P/3
@@ -71,24 +79,27 @@ function update(now: number) {
 
     t = t || now;
     f = now - t;
+    if( MAX_MILLISECONDS_PER_FRAME ) {
+        f = Math.min(f, MAX_MILLISECONDS_PER_FRAME);
+    }
     t = now;
     c.strokeStyle = GROUND_COLOR;
     c.fillRect(0, 0, W, H);
 
     // gravity
     if( FIX_COIN_SCALE ) {
-        w += f / (111 * FIX_COIN_SCALE);
+        w += f / 999;
     } else {
-        w += f / W;
+        w += (f * r) / 9999;
     }
 
     // camera bounds
-    X = x - W/3;
+    X = x - W/4;
     B = y - H/2;
     V = X + W;
     
     // fill in the surfaces
-    l = s[0];
+    l = s[0];    
     while( l.x <= V ) {
         // add in more lines
         A = l.a;
@@ -96,9 +107,12 @@ function update(now: number) {
         q = l.x + C(A) * n;
         k = l.y + S(A) * n;
         if( ONLY_USE_HORIZONTAL_VELOCITY_TO_GENERATE_LINES ) {
-            j = v;
+            j = v + (k - y)/399;
         } else {
             j = Math.max(v, w);
+        }
+        if( !FIX_COIN_SCALE ) {
+            j /= r / 9;
         }
         if( DEADLY_SPIKES ) {
             m = 0;
@@ -115,9 +129,9 @@ function update(now: number) {
             o = Math.min(
                 Math.max(
                     A + (Math.random() - .5) * P/9, 
-                    -P/9 * j
+                    -P / 9 * j
                 ), 
-                (P*(x+99999)/799999) * (1 - j)
+                (P*(x+99999)/999999) * (1 - j)
             );        
         }
         p = (A + o)/2 - P/2;
@@ -213,6 +227,7 @@ function update(now: number) {
                         if( DEADLY_SPIKES && l.d ) {
                             x = W;
                             y = 0;
+                            v = 1;
                         }
                     }
                 }
@@ -223,8 +238,8 @@ function update(now: number) {
         nextPoint = l;
         j++;
     } while( nextPoint.x > X )
-    c.stroke();            
-
+    c.stroke();          
+    
     x += D;
     y += U;     
     
