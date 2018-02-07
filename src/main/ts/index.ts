@@ -40,7 +40,7 @@ if( FIX_VIEWPORT_HEIGHT && FIX_VIEWPORT_WIDTH ) {
 
 x = W;
 y = 0;
-v = 1;
+v = 0;
 w = 0;
 t = 0;
 T = 0;
@@ -107,7 +107,7 @@ function update(now: number) {
         q = l.x + C(A) * n;
         k = l.y + S(A) * n;
         if( ONLY_USE_HORIZONTAL_VELOCITY_TO_GENERATE_LINES ) {
-            j = v + (k - y)/399;
+            j = v;
         } else {
             j = Math.max(v, w);
         }
@@ -227,7 +227,7 @@ function update(now: number) {
                         if( DEADLY_SPIKES && l.d ) {
                             x = W;
                             y = 0;
-                            v = 1;
+                            v = 0;
                         }
                     }
                 }
