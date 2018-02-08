@@ -16,6 +16,7 @@
         b = body;
         c = canvas.getContext('2d');
         d = document;
+        requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || function(f){ setTimeout(f, 1000/30); };
     </script>
     <script  type='text/javascript' src="build/out.js?__inline=true"></script>
 </body>

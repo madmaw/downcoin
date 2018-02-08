@@ -107,24 +107,12 @@
             }
         },
         replace: {
-            js13k_html: {
-                src: ['dist/*.html'],
+            js1k: {
+                src: ['dist/out.min.js'],
                 overwrite: true,
                 replacements: [{
-                    from: /<script [^>]*analytics[^>]*><\/script>/g,
-                    to: ""
-                }, {
-                    from: /\s*\n\s*/g,
-                    to: ""
-                }, {
                     from: /(=|:|return |\(|,)function\(([^\)]*)\)/g, 
                     to:"$1($2)=>"
-                }, {
-                    from: "<script>",
-                    to: "<script>var _;"
-                }, {
-                    from: "null",
-                    to: "_"
                 }]
             },
             dist: {
@@ -200,7 +188,7 @@
     grunt.registerTask('reset', ['clean:all']);
     grunt.registerTask('prod', ['copy', 'ts:dist', 'htmlmin']);
     grunt.registerTask('dist', ['prod', 'closure-compiler:dist', 'replace:dist', 'compress:dist']); //, 'clean:js', 'clean:dist'
-    grunt.registerTask('js1k', ['prod', 'closure-compiler:js1k']);
+    grunt.registerTask('js1k', ['prod', 'closure-compiler:js1k', 'replace:js1k']);
     grunt.registerTask('default', ['ts:dist']);
 
 };

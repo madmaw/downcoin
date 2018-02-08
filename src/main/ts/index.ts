@@ -1,22 +1,26 @@
 // saves about 24 bytes
 const COIN_SYMBOL = null;
 const DRAW_SCORE = true;
-// saves 
-const CENTER_SCORE = true;
+// saves 19 bytes
+const CENTER_SCORE = false;
 
-let ALLOW_JUMPING = true;
-// saves about 13 bytes
-const FIX_VIEWPORT_WIDTH = 0;
+const ALLOW_JUMPING = true;
+// saves about 13 bytes if both on
+const FIX_VIEWPORT_WIDTH = 0; // 799
 const FIX_VIEWPORT_HEIGHT = 0;
+const FIX_COIN_SCALE = 0; // 9
 const DEADLY_SPIKES = true;
 const DEBUG_COLLISIONS = false;
 const SLIGHTLY_SAFER_COLLISIONS = false;
 const GROUND_COLOR = '#fff';
 const COIN_COLOR = '#ff0';
 const ONLY_USE_HORIZONTAL_VELOCITY_TO_GENERATE_LINES = true;
-const FIX_COIN_SCALE = 0;
-const MAX_MILLISECONDS_PER_FRAME = 80;
+// saves 5 bytes
+const MAX_MILLISECONDS_PER_FRAME = 99;
 const GOOD_TOUCH = true;
+const RESTITUTION = 0.3;
+const DISABLE_GRADIENT_EQUALITY_CHECK = true;
+const LEVEL_GENERATION_SCALE_FACTOR = 2;
 
 // TODO draw a spinning $ in the coin
 // TODO glowing ground
@@ -24,13 +28,18 @@ const GOOD_TOUCH = true;
 // TODO buy/sell mode
 // TODO scale radius/gravity to screen size
 
-M = Math.abs;
-S = Math.sin;
-C = Math.cos;
-P = Math.PI;
+//M = Math.abs;
+//S = Math.sin;
+//C = Math.cos;
+//P = Math.PI;
 if( FIX_VIEWPORT_HEIGHT && FIX_VIEWPORT_WIDTH ) {
     W = FIX_VIEWPORT_WIDTH;
     H = FIX_VIEWPORT_HEIGHT;    
+} else if( FIX_VIEWPORT_WIDTH ) {
+    W = FIX_VIEWPORT_WIDTH;
+    H = FIX_VIEWPORT_WIDTH*a.height/a.width;
+    a.width = W;
+    a.height= H;
 } else {
     W = a.width;
     H = a.height;    
@@ -54,11 +63,11 @@ if( FIX_COIN_SCALE ) {
 if( ALLOW_JUMPING ) {
     // have to add to canvas, otherwise it doesn't work on mobile
     if( GOOD_TOUCH ) {
-        onmousedown = a.ontouchstart = function() {
+        onmousedown = a.ontouchstart = () => {
             T = t;
         };
     } else {
-        a.onclick = function () {
+        a.onclick = () => {
             T = t;
         }        
     }
@@ -69,18 +78,18 @@ s = [
         x: 0, 
         y: H,
         u: 0, 
-        v: -r, 
-        a: P/3
+        v: H, 
+        a: 0
     }
 ];
 
-function update(now: number) {
-    requestAnimationFrame(update);
+(_ = (now: number, nextPoint?: Point) => {
+    requestAnimationFrame(_);
 
-    t = t || now;
-    f = now - t;
     if( MAX_MILLISECONDS_PER_FRAME ) {
-        f = Math.min(f, MAX_MILLISECONDS_PER_FRAME);
+        f = Math.min(now - (t || now), MAX_MILLISECONDS_PER_FRAME);
+    } else {
+        f = now - (t || now);
     }
     t = now;
     c.strokeStyle = GROUND_COLOR;
@@ -96,16 +105,13 @@ function update(now: number) {
     // camera bounds
     X = x - W/4;
     B = y - H/2;
-    V = X + W;
     
     // fill in the surfaces
     l = s[0];    
-    while( l.x <= V ) {
+    while( l.x <= X + W ) {
         // add in more lines
-        A = l.a;
-        n = r * 2;
-        q = l.x + C(A) * n;
-        k = l.y + S(A) * n;
+        q = l.x + Math.cos(l.a) * r * LEVEL_GENERATION_SCALE_FACTOR;
+        k = l.y + Math.sin(l.a) * r * LEVEL_GENERATION_SCALE_FACTOR;
         if( ONLY_USE_HORIZONTAL_VELOCITY_TO_GENERATE_LINES ) {
             j = v;
         } else {
@@ -118,29 +124,29 @@ function update(now: number) {
             m = 0;
         }
         if( DEADLY_SPIKES && l.d < 0 ) {
-            o = P / 3;
+            o = Math.PI / 3;
             m = -l.d;
-        } else if( DEADLY_SPIKES && Math.random() < x/999999 && A < 0 && !l.d ) {
-            o = -P / 3;
-            m = A;
+        } else if( DEADLY_SPIKES && Math.random() < x/999999 && l.a < 0 && !l.d ) {
+            o = -Math.PI / 3;
+            m = l.a;
         } else if( DEADLY_SPIKES && l.d > 0 ) {
             o = -l.d;
         } else {
             o = Math.min(
                 Math.max(
-                    A + (Math.random() - .5) * P/9, 
-                    -P / 9 * j
+                    l.a + (Math.random() - .5) * Math.PI/9, 
+                    -Math.PI / 9 * j
                 ), 
-                (P*(x+99999)/999999) * (1 - j)
+                (Math.PI*(x+99999)/999999) * (1 - j)
             );        
         }
-        p = (A + o)/2 - P/2;
+        p = (l.a + o)/2 - Math.PI/2;
         if( DEADLY_SPIKES ) {
             l = {
                 x: q, 
                 y: k, 
-                u: q + C(p) * r, 
-                v: k + S(p) * (m>0?0:r),
+                u: q + Math.cos(p) * r, 
+                v: k + Math.sin(p) * (m>0?0:r),
                 a: o, 
                 d: m
             };                
@@ -148,8 +154,8 @@ function update(now: number) {
             l = {
                 x: q, 
                 y: k, 
-                u: q + C(p) * r, 
-                v: k + S(p) * r,
+                u: q + Math.cos(p) * r, 
+                v: k + Math.sin(p) * r,
                 a: o
             };    
         }
@@ -159,27 +165,19 @@ function update(now: number) {
     // draw in the surface and collide as neccessary 
     D = v * f;
     U = w * f;
-    F = Math.atan2(U, D);
-    G = U / D;
+    //F = Math.atan2(U, D);
     j = 0;
-    let nextPoint: Point;
     c.beginPath();
     do {
         l = s[j];
         c.lineTo(l.x - X, l.y - B);
-        O = l.a - P/2;
-        Q = M(O - F);
-        /*
-        if( Q > P ) {
-            Q -= P*2;
-        } else if( Q < -P ) {
-            Q += P*2;
-        }
-        */
-        if( nextPoint && Q > P/2 && Q < P*3/2 ) {
+        O = l.a - Math.PI/2;
+        Q = Math.abs(O - Math.atan2(U, D));
+        if( nextPoint && Q > Math.PI/2 && Q < Math.PI*3/2 ) {
             // check for collision
             K = Math.tan(l.a);
-            if( K != G ) {
+            G = U / D;
+            if( DISABLE_GRADIENT_EQUALITY_CHECK || K != G ) {
                 Z = l.v - K * l.u;
                 if( v ) {
                     q = ((y - G * x) - Z)/(K - G);
@@ -189,7 +187,7 @@ function update(now: number) {
                 // is it in bounds of the line?
                 if( 
                     // x always goes from right to left
-                    q <= nextPoint.u && q >= l.u
+                    q < nextPoint.u && q >= l.u
                 ) {
                     k = K * q + Z;
                     e = x - q;
@@ -197,11 +195,15 @@ function update(now: number) {
                     if( (e * e) + (z * z) < (D * D) + (U * U) ) {
 
                         // bounce off
-                        h = S(l.a);
-                        g = C(l.a);
+                        h = Math.sin(l.a);
+                        g = Math.cos(l.a);
 
                         m = v * g + w * h;
-                        n = (v * h - w * g) * .1;
+                        if( RESTITUTION ) {
+                            n = (v * h - w * g) * RESTITUTION;
+                        } else {
+                            n = 0;
+                        }
                         v = m * g - n * h;
                         w = m * h + n * g;
 
@@ -212,7 +214,7 @@ function update(now: number) {
 
                         // elevate slightly to avoid falling through ground
                         if( SLIGHTLY_SAFER_COLLISIONS ) {
-                            n = -Math.sqrt(M(m)) - .1;
+                            n = -Math.sqrt(Math.abs(m)) - .1;
                         } else {
                             n = -1;
                         }
@@ -224,10 +226,10 @@ function update(now: number) {
                         U = m * h + n * g;
 
                         L = now;
+
                         if( DEADLY_SPIKES && l.d ) {
                             x = W;
                             y = 0;
-                            v = 0;
                         }
                     }
                 }
@@ -243,11 +245,11 @@ function update(now: number) {
     x += D;
     y += U;     
     
-    if( ALLOW_JUMPING && T && M(T - L) < 299 ) {
+    if( ALLOW_JUMPING && T && Math.abs(T - L) < 299 ) {
         if( FIX_COIN_SCALE ) {
-            w -= FIX_COIN_SCALE/20.0;
+            w = -FIX_COIN_SCALE/20.0;
         } else {
-            w -= r/20.0;
+            w = -r/20.0;
             //w -= 0.5;
         }
         T = 0;
@@ -270,15 +272,17 @@ function update(now: number) {
 
     // draw player
     c.beginPath();
-    c.arc(x - X, y - B, r, 0, P*2);
+    c.arc(x - X, y - B, r, 0, Math.PI*2);
     if( COIN_COLOR ) {
         c.fillStyle = COIN_COLOR;
         c.fill();
         if( DRAW_SCORE ) {
             if( CENTER_SCORE ) {
                 c.textAlign = 'center';
+                c.fillText('$'+(999-(y/99|0)), x - X, y - B - r * 2);    
+            } else {
+                c.fillText('$'+(999-(y/99|0)), x - X - r, y - B - r * 2);    
             }
-            c.fillText('$'+(999-(y/99|0)), x - X, y - B - r * 2);    
         }
         c.fillStyle = '#000';
         if( COIN_SYMBOL ) {
@@ -287,6 +291,5 @@ function update(now: number) {
     } else {
         c.stroke();
     }
-}
-update(0);
+})(0);
 

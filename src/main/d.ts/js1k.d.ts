@@ -103,3 +103,5 @@ declare let n: number;
 declare let o: number;
 // leftOverY
 declare let p: number;
+// update
+declare let _: (n: number) => void;

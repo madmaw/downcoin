@@ -4,6 +4,9 @@ var c;
 var d;
 
 var onclick;
+var onmousedown;
+var ontouchstart;
+var onkeydown;
 
 var M;
 var P;
@@ -46,3 +49,4 @@ var m;
 var n;
 var o;
 var p;
+var _;
