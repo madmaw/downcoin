@@ -77,9 +77,9 @@ if( ALLOW_JUMPING ) {
 s = [
     {
         x: 0, 
-        y: a.height,
+        y: 0,
         u: 0, 
-        v: a.height, 
+        v: 0, 
         a: 0
     }
 ];
@@ -135,7 +135,7 @@ s = [
         if( DEADLY_SPIKES && l.d > 1 ) {
             o = Math.PI / 3;
             m = 1;
-        } else if( DEADLY_SPIKES && Math.random() < x/999999 && Math.abs(l.a) < .3 && !l.d ) {
+        } else if( DEADLY_SPIKES && Math.random() < (.3 - Math.abs(l.a))*Math.sqrt(x)/999 && !l.d ) {
             o = -Math.PI / 3;
             m = 2;
         } else {
@@ -208,22 +208,22 @@ s = [
                     if( (e * e) + (z * z) < (D * D) + (U * U) ) {
 
                         // bounce off
-                        h = Math.sin(l.a);
-                        g = Math.cos(l.a);
+                        //h = Math.sin(l.a);
+                        //g = Math.cos(l.a);
 
-                        m = v * g + w * h;
+                        m = v * Math.cos(l.a) + w * Math.sin(l.a);
                         if( RESTITUTION ) {
-                            n = (v * h - w * g) * RESTITUTION;
+                            n = (v * Math.sin(l.a) - w * Math.cos(l.a)) * RESTITUTION;
                         } else {
                             n = 0;
                         }
-                        v = m * g - n * h;
-                        w = m * h + n * g;
+                        v = m * Math.cos(l.a) - n * Math.sin(l.a);
+                        w = m * Math.sin(l.a) + n * Math.cos(l.a);
 
                         o = x + D - q;
                         p = y + U - k;
 
-                        m = o * g + p * h;
+                        m = o * Math.cos(l.a) + p * Math.sin(l.a);
 
                         // elevate slightly to avoid falling through ground
                         if( SLIGHTLY_SAFER_COLLISIONS ) {
@@ -235,8 +235,8 @@ s = [
                         x = q;
                         y = k;
 
-                        D = m * g - n * h;
-                        U = m * h + n * g;
+                        D = m * Math.cos(l.a) - n * Math.sin(l.a);
+                        U = m * Math.sin(l.a) + n * Math.cos(l.a);
 
                         L = now;
 
@@ -257,7 +257,7 @@ s = [
     
     if( ALLOW_JUMPING && T && Math.abs(T - L) < 299 ) {
         if( FIX_COIN_SCALE ) {
-            w = -FIX_COIN_SCALE/20;
+            w = -FIX_COIN_SCALE/30;
         } else {
             w = -r/30;
             //w -= 0.5;
