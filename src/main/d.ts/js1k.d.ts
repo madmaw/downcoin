@@ -90,7 +90,7 @@ declare let e: number;
 declare let z: number;
 // sin
 declare let h: number;
-// cos
+// spike count
 declare let g: number;
 
 // temp x

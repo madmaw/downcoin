@@ -12,19 +12,24 @@ const FIX_VIEWPORT_WIDTH = 0; // 799
 const FIX_VIEWPORT_HEIGHT = 0;
 const FIX_COIN_SCALE = 0; // 9
 
+
 const DEADLY_SPIKES = true;
+const FLATTEN_SPIKES = true;
+
 const DEBUG_COLLISIONS = false;
 const SLIGHTLY_SAFER_COLLISIONS = false;
-// #999 saves a byte due to compression
-const GROUND_COLOR = '#fff';
+const SLIGHTLY_SAFER_DEATHS = false;
+// #99* saves a byte due to compression
+const GROUND_COLOR = '#fff'; //99f
 // #990 saves a byte due to compression
-const COIN_COLOR = '#ff0'; // #ff0
-// #099 saves a byte due to compression
-const BACKGROUND_COLOR = '#033'; // #000
+const COIN_COLOR = '#ff9'; 
+// #*33 saves a byte due to compression
+const BACKGROUND_COLOR = '#033';
 // saves 5 bytes
-const MAX_MILLISECONDS_PER_FRAME = 99;
-// false saves 17 bytes
+const MAX_MILLISECONDS_PER_FRAME = 66; //99 compresses well
 const GOOD_TOUCH = true;
+// true saves 5 bytes on GOOD_TOUCH, both false saves 17
+const OK_TOUCH = false;
 const RESTITUTION = 0.3;
 const DISABLE_GRADIENT_EQUALITY_CHECK = true;
 const LEVEL_GENERATION_SCALE_FACTOR = 2;
@@ -55,6 +60,7 @@ w = 0;
 t = 0;
 T = 0;
 L = 0;
+g = 0;
 if( FIX_COIN_SCALE ) {
     r = FIX_COIN_SCALE;
 } else {
@@ -65,6 +71,10 @@ if( ALLOW_JUMPING ) {
     // have to add to canvas, otherwise it doesn't work on mobile
     if( GOOD_TOUCH ) {
         onmousedown = a.ontouchstart = () => {
+            T = t;
+        };
+    } else if( OK_TOUCH ) {
+        onmousedown = a.onclick = () => {
             T = t;
         };
     } else {
@@ -103,7 +113,7 @@ s = [
     */
     // distance traveled
     D = v * f;
-    U = (FIX_COIN_SCALE?w += f / 999:w += (f * r) / 9999) * f;
+    U = (FIX_COIN_SCALE?w += f / 6999:w += (f * r) / 13399) * f;
 
     // camera bounds
     X = x - a.width/4;
@@ -124,30 +134,32 @@ s = [
         // add in more lines
         k = l.y + Math.sin(l.a) * (LEVEL_GENERATION_SCALE_FACTOR?r * LEVEL_GENERATION_SCALE_FACTOR:r);
         if( !FIX_COIN_SCALE ) {
-            j = x>a.width?v * r / 9 + (l.v - y)*4/a.width - r/50:0;
+            j = x>a.width?v * r / 9 + (l.v - y)*4/a.width:-.1;
         } else {
             // TODO not sure this forumla is right
-            j =  x>a.width?v + (l.v - y - 20)/99:0;
+            j =  x>a.width?v + (l.v - y - 20)/33:0;
         }
-        if( DEADLY_SPIKES ) {
-            m = 0;
-        }
-        if( DEADLY_SPIKES && l.d > 1 ) {
-            o = Math.PI / 3;
-            m = 1;
-        } else if( DEADLY_SPIKES && Math.random() < (.3 - Math.abs(l.a))*Math.sqrt(x)/999 && !l.d ) {
-            o = -Math.PI / 3;
-            m = 2;
+        if( DEADLY_SPIKES && l.d < 0 ) {
+            o = 1; // PI/3
+            m = -l.d;
+        } else if( DEADLY_SPIKES && Math.random() < (g?(.2 - Math.abs(l.a))*g:l.d)*Math.sqrt(x/r)/3399 && l.d>=0 ) {
+            o = -1;//-PI/3
+            m = -l.d/2-g;
+            g = 0;
         } else {
+            if( DEADLY_SPIKES ) {
+                m = 0;
+                g++;
+            }
             if( FLATTEN_AT_ZERO && k > ZERO/r ) {
                 o = 0;
             } else {
                 o = Math.min(
                     Math.max(
-                        l.d?0:l.a + (Math.random() - .5) * Math.PI/9, 
-                        -Math.PI / 9 * j
+                        l.d?0:l.a + (Math.random() - .5)/3, 
+                        -j/3
                     ), 
-                    (Math.PI*(x+9999)/99999) * (1 - j)
+                    (Math.sqrt(x/r)/33) * (1 - j)
                 );            
             }
         }
@@ -157,7 +169,7 @@ s = [
                 x: q, 
                 y: k, 
                 u: q + Math.cos(p) * r, 
-                v: k + (m>0?0:Math.sin(p) * r),
+                v: k + (m>0 && FLATTEN_SPIKES?0:Math.sin(p) * r),
                 a: o, 
                 d: m
             };                
@@ -243,6 +255,9 @@ s = [
                         if( DEADLY_SPIKES && l.d ) {
                             x = a.width;
                             y = 0;
+                            if( SLIGHTLY_SAFER_DEATHS ) {
+                                break;
+                            }
                         }
                     }
                 }
@@ -257,9 +272,9 @@ s = [
     
     if( ALLOW_JUMPING && T && Math.abs(T - L) < 299 ) {
         if( FIX_COIN_SCALE ) {
-            w = -FIX_COIN_SCALE/30;
+            w = -FIX_COIN_SCALE/99;
         } else {
-            w = -r/30;
+            w = -r/33;
             //w -= 0.5;
         }
         T = 0;
@@ -282,7 +297,7 @@ s = [
 
     // draw player
     c.beginPath();
-    c.arc(x - X, y - Y, r, 0, Math.PI*2);
+    c.arc(x - X, y - Y, r, 0, 7);
     if( COIN_COLOR ) {
         c.fillStyle = COIN_COLOR;
         c.fill();
