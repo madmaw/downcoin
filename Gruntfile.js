@@ -13,7 +13,8 @@
                     target: 'es5', //or es3
                     basePath: 'src/main/ts',
                     sourceMap: true,
-                    declaration: false
+                    declaration: false, 
+                    comments: true
                 }
             }
 

@@ -14,9 +14,9 @@ declare var S: (a: number) => number;
 // cos 
 declare var C: (a: number) => number;
 // canvas width
-declare var W: number;
+//declare var W: number;
 // canvas height
-declare var H: number;
+//declare var H: number;
 
 // coin x
 declare var x: number;
@@ -52,9 +52,7 @@ declare var f: number;
 // camera minX
 declare var X: number;
 // camera minY
-declare var B: number;
-// camera maxX
-declare var V: number;
+declare var Y: number;
 
 // last
 declare var l: Point;
