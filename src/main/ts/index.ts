@@ -2,7 +2,7 @@
 const COIN_SYMBOL = null;
 const DRAW_SCORE = true;
 // saves 19 bytes
-const CENTER_SCORE = false;
+const CENTER_SCORE = true;
 
 const ALLOW_JUMPING = true;
 const FLATTEN_AT_ZERO = false;
@@ -12,6 +12,9 @@ const FIX_VIEWPORT_WIDTH = 0; // 799
 const FIX_VIEWPORT_HEIGHT = 0;
 const FIX_COIN_SCALE = 0; // 9
 
+const LINE_SCALE = 0.2; //0.2
+const FONT_SCALE = 1.5; // 1.5
+
 
 const DEADLY_SPIKES = true;
 const FLATTEN_SPIKES = true;
@@ -19,6 +22,7 @@ const FLATTEN_SPIKES = true;
 const DEBUG_COLLISIONS = false;
 const SLIGHTLY_SAFER_COLLISIONS = false;
 const SLIGHTLY_SAFER_DEATHS = false;
+const REGENERATE_ON_DEATH = false;
 // #99* saves a byte due to compression
 const GROUND_COLOR = '#fff'; //99f
 // #990 saves a byte due to compression
@@ -94,6 +98,13 @@ s = [
     }
 ];
 
+if( LINE_SCALE ) {
+    c.lineWidth = Math.max(1, LINE_SCALE * r);
+}
+if( FONT_SCALE ) {
+    c.font = ''+Math.max(12, r * FONT_SCALE)+'px serif';
+}
+
 (_ = (now: number, nextPoint?: Point) => {
     requestAnimationFrame(_);
 
@@ -134,7 +145,7 @@ s = [
         // add in more lines
         k = l.y + Math.sin(l.a) * (LEVEL_GENERATION_SCALE_FACTOR?r * LEVEL_GENERATION_SCALE_FACTOR:r);
         if( !FIX_COIN_SCALE ) {
-            j = x>a.width?v * r / 9 + (l.v - y)*4/a.width:-.1;
+            j = x>a.width?v * 9 / r + (l.v - y)*4/a.width:-.1;
         } else {
             // TODO not sure this forumla is right
             j =  x>a.width?v + (l.v - y - 20)/33:0;
@@ -256,8 +267,13 @@ s = [
                             x = a.width;
                             y = 0;
                             if( SLIGHTLY_SAFER_DEATHS ) {
+                                if( REGENERATE_ON_DEATH ) {
+                                    w = 0;
+                                    v = 0;
+                                    s.splice(0, s.length-1);
+                                }
                                 break;
-                            }
+                            }    
                         }
                     }
                 }
