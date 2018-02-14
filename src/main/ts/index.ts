@@ -2,7 +2,7 @@
 const COIN_SYMBOL = null;
 const DRAW_SCORE = true;
 // saves 19 bytes
-const CENTER_SCORE = true;
+const CENTER_SCORE = false;
 
 const ALLOW_JUMPING = true;
 const FLATTEN_AT_ZERO = false;
@@ -12,8 +12,8 @@ const FIX_VIEWPORT_WIDTH = 0; // 799
 const FIX_VIEWPORT_HEIGHT = 0;
 const FIX_COIN_SCALE = 0; // 9
 
-const LINE_SCALE = 0.2; //0.2
-const FONT_SCALE = 1.5; // 1.5
+const LINE_SCALE = 0; //0.2
+const FONT_SCALE = 0; // 1.5
 
 
 const DEADLY_SPIKES = true;
@@ -24,17 +24,17 @@ const SLIGHTLY_SAFER_COLLISIONS = false;
 const SLIGHTLY_SAFER_DEATHS = false;
 const REGENERATE_ON_DEATH = false;
 // #99* saves a byte due to compression
-const GROUND_COLOR = '#fff'; //99f
-// #990 saves a byte due to compression
-const COIN_COLOR = '#ff9'; 
+const GROUND_COLOR = '#99f'; //99f
+// #*99 saves a byte due to compression
+const COIN_COLOR = '#f99'; 
 // #*33 saves a byte due to compression
-const BACKGROUND_COLOR = '#033';
+const BACKGROUND_COLOR = '#330';
 // saves 5 bytes
-const MAX_MILLISECONDS_PER_FRAME = 66; //99 compresses well
-const GOOD_TOUCH = true;
+const MAX_MILLISECONDS_PER_FRAME = 0; //99 compresses well
+const GOOD_TOUCH = false;
 // true saves 5 bytes on GOOD_TOUCH, both false saves 17
-const OK_TOUCH = false;
-const RESTITUTION = 0.3;
+const OK_TOUCH = true;
+const RESTITUTION = .33;
 const DISABLE_GRADIENT_EQUALITY_CHECK = true;
 const LEVEL_GENERATION_SCALE_FACTOR = 2;
 
@@ -286,7 +286,7 @@ if( FONT_SCALE ) {
     x += D;
     y += U;     
     
-    if( ALLOW_JUMPING && T && Math.abs(T - L) < 299 ) {
+    if( ALLOW_JUMPING && T && Math.abs(T - L) < 233 ) {
         if( FIX_COIN_SCALE ) {
             w = -FIX_COIN_SCALE/99;
         } else {
